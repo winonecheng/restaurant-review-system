@@ -12,9 +12,15 @@ A simple restaurant review system built with Django and Django Rest Framework.
    - Windows: `venv\Scripts\activate`
    - Linux/Mac: `source venv/bin/activate`
 4. Install dependencies: `pip install -r requirements.txt`
-5. Apply migrations: `python manage.py migrate`
-6. Create a superuser: `python manage.py createsuperuser`
-7. Run the server: `python manage.py runserver`
+5. Create migrations for each app:
+   ```
+   python manage.py makemigrations users
+   python manage.py makemigrations restaurants
+   python manage.py makemigrations reviews
+   ```
+6. Apply migrations: `python manage.py migrate`
+7. Create a superuser: `python manage.py createsuperuser`
+8. Run the server: `python manage.py runserver`
 
 ### Docker Setup
 
@@ -42,9 +48,55 @@ You can also run this application using Docker:
 
 ### Authentication
 
-The API uses Django's session authentication. You can log in via:
+The API supports token-based authentication. You can obtain a token via:
+
+#### Register a new user
+- **POST** `/api/auth/register/`
+- Example request body:
+```json
+{
+  "username": "newuser",
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+- Example response:
+```json
+{
+  "token": "your_auth_token",
+  "user_id": 1,
+  "username": "newuser",
+  "email": "user@example.com"
+}
+```
+
+#### Login with existing user
+- **POST** `/api/auth/login/`
+- Example request body:
+```json
+{
+  "username": "existinguser",
+  "password": "yourpassword"
+}
+```
+- Example response:
+```json
+{
+  "token": "your_auth_token",
+  "user_id": 1,
+  "username": "existinguser",
+  "email": "user@example.com"
+}
+```
+
+#### Using the token
+Include the token in the Authorization header for authenticated requests:
+```
+Authorization: Token your_auth_token
+```
+
+You can also log in via:
 - Django admin interface at `/admin/`
-- Django REST framework's browsable API at `/api-auth/login/`
 
 ### Restaurants
 
@@ -53,6 +105,7 @@ The API uses Django's session authentication. You can log in via:
 - Query Parameters:
   - `cuisine_type`: Filter by cuisine type (e.g., Italian, Chinese)
   - `sort_by_score`: Set to any value to sort by average score
+  - `search`: Search restaurants by name or address
 
 #### Get a specific restaurant
 - **GET** `/api/restaurants/{id}/`
@@ -61,7 +114,7 @@ The API uses Django's session authentication. You can log in via:
 - **POST** `/api/restaurants/`
 - Authentication required
 - Example request body:
-```
+```json
 {
   "name": "Restaurant Name",
   "address": "123 Main St",
@@ -95,7 +148,7 @@ The API uses Django's session authentication. You can log in via:
 - **POST** `/api/reviews/`
 - Authentication required
 - Body:
-```
+```json
 {
   "restaurant": 1,
   "score": 5,
@@ -113,14 +166,77 @@ The API uses Django's session authentication. You can log in via:
 - Authentication required
 - Only the owner of the review can delete it
 
-## Feature Extensions (Optional)
+## Testing with cURL
 
-### Restaurant Recommendation API
+Here are some examples of how to test the API with cURL:
 
-To implement a simple recommendation system, we could:
+### Authentication
+```bash
+# Register a new user
+curl -X POST http://localhost:8000/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "password123", "email": "test@example.com"}'
 
-- **GET** `/api/recommendations/`
-- Returns restaurants that match user preferences based on:
-  - Previous high-rated restaurants
-  - Cuisine types frequently rated highly
-  - Restaurants highly rated by users with similar taste profiles
+# Login to get token
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "password123"}'
+
+# Save token for later use
+export TOKEN="your_token_here"
+```
+
+### Restaurants
+```bash
+# List all restaurants
+curl -X GET http://localhost:8000/api/restaurants/
+
+# Create a new restaurant
+curl -X POST http://localhost:8000/api/restaurants/ \
+  -H "Authorization: Token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Italian Bistro",
+    "address": "123 Pasta Avenue, Food City",
+    "cuisine_type": "Italian"
+  }'
+
+# Get a specific restaurant
+curl -X GET http://localhost:8000/api/restaurants/1/
+
+# Update a restaurant
+curl -X PATCH http://localhost:8000/api/restaurants/1/ \
+  -H "Authorization: Token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Updated Restaurant Name"}'
+
+# Delete a restaurant
+curl -X DELETE http://localhost:8000/api/restaurants/1/ \
+  -H "Authorization: Token $TOKEN"
+```
+
+### Reviews
+```bash
+# List all reviews
+curl -X GET http://localhost:8000/api/reviews/
+
+# Create a review
+curl -X POST http://localhost:8000/api/reviews/ \
+  -H "Authorization: Token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "restaurant": 1,
+    "score": 4,
+    "comment": "Great food and service!"
+  }'
+
+# Update your review
+curl -X PATCH http://localhost:8000/api/reviews/1/ \
+  -H "Authorization: Token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"score": 5, "comment": "Updated: The food was amazing!"}'
+
+# Delete your review
+curl -X DELETE http://localhost:8000/api/reviews/1/ \
+  -H "Authorization: Token $TOKEN"
+```
