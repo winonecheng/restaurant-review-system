@@ -22,9 +22,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third party apps
     'rest_framework',
+    'rest_framework.authtoken',
     # Local apps
     'restaurants',
     'reviews',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -85,10 +87,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # REST Framework settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
 }
 
 # Internationalization
