@@ -97,7 +97,6 @@ Authorization: Token your_auth_token
 - Query Parameters:
   - `cuisine_type`: Filter by cuisine type (e.g., Italian, Chinese)
   - `sort_by_score`: Set to any value to sort by average score
-  - `search`: Search restaurants by name or address
 
 #### Get a specific restaurant
 - **GET** `/api/restaurants/{id}/`
