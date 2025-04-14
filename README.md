@@ -127,11 +127,8 @@ Authorization: Token your_auth_token
 #### List all reviews
 - **GET** `/api/reviews/`
 - Query Parameters:
-  - `restaurant`: Filter by restaurant ID
-  - `user`: Filter by user ID
   - `restaurant_id`: Alternative filter by restaurant ID
   - `user_id`: Alternative filter by user ID
-  - `ordering`: Order by field (e.g., `created_at`, `-score`)
 
 #### Get a specific review
 - **GET** `/api/reviews/{id}/`
