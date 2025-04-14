@@ -34,7 +34,7 @@ You can also run this application using Docker:
    docker run -d -p 8000:8000 -v $(pwd)/data:/app/data restaurant-review-system
    ```
    This mounts a local `data` directory to `/app/data` in the container, where SQLite database will be stored.
-ˋ. Create a superuser in the Docker container:
+4. Create a superuser in the Docker container:
    ```
    docker exec -it $(docker ps -q --filter ancestor=restaurant-review-system) python manage.py createsuperuser
    ```
